@@ -20,7 +20,7 @@ public class APPApplication extends ResourceConfig {
     @GET
     @Produces({ MediaType.APPLICATION_JSON})
     public Object getAll() {
-        Version ver = new Version("1.0.0", "2017-10-06");
+        Version ver = new Version("1.0.0", "2017-10-10");
         return ver;
     }
 

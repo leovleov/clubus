@@ -13,7 +13,7 @@ public class Club {
      * @param clubLeaders The club organizers.
      * @param picture The picture link of a club.
      */
-    void Club( String clubName, String clubInfo, String clubLeaders, String picture){
+    public Club( String clubName, String clubInfo, String clubLeaders, String picture){
         this.clubName = clubName;
         this.clubInfo = clubInfo;
         this.clubLeaders = clubLeaders;
