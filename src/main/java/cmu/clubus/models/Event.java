@@ -1,13 +1,13 @@
 package cmu.clubus.models;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 /**
  * Basic Event class.
  */
 public class Event {
     String eventId, clubId, eventName, eventInfo, picture;
-    Date eventDateTime;
+    Timestamp eventDateTime;
 
     /**
      * The constructor for Event.
@@ -17,7 +17,7 @@ public class Event {
      * @param eventDateTime The date that this event holds.
      * @param picture The picture link of this event.
      */
-    public Event(String clubId, String eventName, String eventInfo, Date eventDateTime, String picture){
+    public Event(String clubId, String eventName, String eventInfo, Timestamp eventDateTime, String picture){
         this.clubId = clubId;
         this.eventName = eventName;
         this.eventInfo = eventInfo;

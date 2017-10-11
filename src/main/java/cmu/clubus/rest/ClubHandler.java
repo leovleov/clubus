@@ -1,7 +1,6 @@
 package cmu.clubus.rest;
 
-import cmu.clubus.exceptions.APPBadRequestException;
-import cmu.clubus.exceptions.APPInternalServerException;
+import cmu.clubus.exceptions.*;
 import cmu.clubus.helpers.DbConnection;
 import cmu.clubus.helpers.PATCH;
 import cmu.clubus.models.Club;
@@ -69,11 +68,16 @@ public class ClubHandler {
                         rs.getString("picture"));
                 club.setId(rs.getString("clubId"));
             }
+            else{
+                throw new APPNotFoundException(404,"Failed to find an event.");
+            }
 
             connection.close();
             return club;
         } catch(SQLException e) {
             throw new APPBadRequestException(33,"Failed to get a club.");
+        } catch(APPNotFoundException e) {
+            throw new APPNotFoundException(404,"Failed to find a club.");
         } catch (Exception e) {
             throw new APPInternalServerException(99,"Something happened at server side!");
         }
