@@ -70,13 +70,18 @@ public class UserHandler {
                         rs.getBoolean("isSubscribed"), rs.getString("facebookId"));
                 user.setId(rs.getString("userId"));
             }
+            else{
+                throw new APPNotFoundException(404,"Failed to find an user.");
+            }
             connection.close();
-            if(user == null)
-                return new APPResponse(user,false);
-            else
+            //if(user == null)
+            //    return new APPResponse(user,false);
+            //else
                 return new APPResponse(user);
         } catch(SQLException e) {
             throw new APPBadRequestException(33,"Failed to get an user.");
+        }  catch(APPNotFoundException e) {
+            throw new APPNotFoundException(404,"Failed to find an user.");
         } catch (Exception e) {
             throw new APPInternalServerException(99,"Something happened at server side!");
         }
@@ -99,7 +104,7 @@ public class UserHandler {
                 user.setId(rs.getString("userId"));
             }
             else{
-                throw new APPNotFoundException(404,"Failed to find an event.");
+                throw new APPNotFoundException(404,"Failed to find an user.");
             }
 
             connection.close();

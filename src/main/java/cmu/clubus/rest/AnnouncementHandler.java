@@ -1,10 +1,9 @@
 package cmu.clubus.rest;
 
-import cmu.clubus.exceptions.APPBadRequestException;
-import cmu.clubus.exceptions.APPInternalServerException;
-import cmu.clubus.exceptions.APPNotFoundException;
+import cmu.clubus.exceptions.*;
+import cmu.clubus.helpers.DbConnection;
 import cmu.clubus.helpers.*;
-import cmu.clubus.models.Event;
+import cmu.clubus.models.Announcement;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -16,13 +15,13 @@ import javax.ws.rs.core.MediaType;
 import java.sql.*;
 import java.util.ArrayList;
 
-@Path("events")
-public class EventHandler {
+@Path("announcements")
+public class AnnouncementHandler {
     DbConnection database;
     Connection connection;
     private ObjectWriter ow;
 
-    public EventHandler() throws Exception {
+    public AnnouncementHandler() throws Exception {
         database= new DbConnection();
 
         ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
@@ -31,21 +30,21 @@ public class EventHandler {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public APPResponse getAllClubs(){
-        ArrayList<Event> eventList = new ArrayList<>();
+        ArrayList<Announcement> annList = new ArrayList<>();
         try {
             connection = database.getConnection();
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM clubus.events");
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM clubus.announcements");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Event event = new Event(rs.getString("clubId"), rs.getString("eventName"), rs.getString("eventInfo"),
-                        rs.getTimestamp("eventDateTime"), rs.getString("picture"));
-                event.setId(rs.getString("eventId"));
-                eventList.add(event);
+                Announcement ann = new Announcement(rs.getString("clubId"), rs.getString("announcementName"),
+                        rs.getString("announcementInfo"), rs.getTimestamp("announcementDateTime"), rs.getString("picture"));
+                ann.setId(rs.getString("announcementId"));
+                annList.add(ann);
             }
             connection.close();
-            return new APPResponse(eventList);
+            return new APPResponse(annList);
         } catch(SQLException e) {
-            throw new APPBadRequestException(33,"Failed to get all events.");
+            throw new APPBadRequestException(33,"Failed to get all announcements.");
         } catch (Exception e) {
             throw new APPInternalServerException(99,"Something happened at server side!");
         }
@@ -58,24 +57,24 @@ public class EventHandler {
 
         try{
             connection = database.getConnection();
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM clubus.events WHERE eventId = '"+id+"'");
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM clubus.announcements WHERE announcementId = '"+id+"'");
             ResultSet rs = ps.executeQuery();
-            Event event = null;
+            Announcement ann = null;
             if(rs.next()) {
-                event = new Event(rs.getString("clubId"), rs.getString("eventName"), rs.getString("eventInfo"),
-                        rs.getTimestamp("eventDateTime"), rs.getString("picture"));
-                event.setId(rs.getString("eventId"));
+                ann = new Announcement(rs.getString("clubId"), rs.getString("announcementName"),
+                        rs.getString("announcementInfo"), rs.getTimestamp("announcementDateTime"), rs.getString("picture"));
+                ann.setId(rs.getString("announcementId"));
             }
             else{
-                throw new APPNotFoundException(404,"Failed to find an event.");
+                throw new APPNotFoundException(404,"Failed to find an announcement.");
             }
 
             connection.close();
-            return new APPResponse(event);
+            return new APPResponse(ann);
         } catch(SQLException e) {
-            throw new APPBadRequestException(33,"Failed to get an event.");
+            throw new APPBadRequestException(33,"Failed to get an announcement.");
         } catch(APPNotFoundException e) {
-            throw new APPNotFoundException(404,"Failed to find an event.");
+            throw new APPNotFoundException(404,"Failed to find an announcement.");
         } catch (Exception e) {
             throw new APPInternalServerException(99,"Something happened at server side!");
         }
@@ -93,21 +92,21 @@ public class EventHandler {
             throw new APPBadRequestException(33, e.getMessage());
         }
         if (!json.has("clubId"))
-            throw new APPBadRequestException(55,"missing club id");
-        if (!json.has("eventName"))
-            throw new APPBadRequestException(55,"missing name");
-        if (!json.has("eventInfo"))
-            throw new APPBadRequestException(55,"missing description");
-        if (!json.has("eventDateTime"))
-            throw new APPBadRequestException(55,"missing event time");
+            throw new APPBadRequestException(55,"Missing club id.");
+        if (!json.has("announcementName"))
+            throw new APPBadRequestException(55,"Missing name.");
+        if (!json.has("announcementInfo"))
+            throw new APPBadRequestException(55,"Missing description.");
+        if (!json.has("announcementDateTime"))
+            throw new APPBadRequestException(55,"Missing event time.");
         try {
-            String sql = "INSERT INTO clubus.events(clubId, eventName, eventInfo, eventDateTime, picture) VALUES(?,?,?,?,?)";
+            String sql = "INSERT INTO clubus.announcements(clubId, announcementName, announcementInfo, announcementDateTime, picture) VALUES(?,?,?,?,?)";
             connection = database.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, json.getString("clubId"));
-            ps.setString(2, json.getString("eventName"));
-            ps.setString(3, json.getString("eventInfo"));
-            ps.setTimestamp(4, Timestamp.valueOf(json.getString("eventDateTime") )); //new Timestamp(System.currentTimeMillis())
+            ps.setString(2, json.getString("announcementName"));
+            ps.setString(3, json.getString("announcementInfo"));
+            ps.setTimestamp(4, Timestamp.valueOf(json.getString("announcementDateTime") )); //new Timestamp(System.currentTimeMillis())
             if (json.has("picture"))
                 ps.setString(5, json.getString("picture"));
             else
@@ -119,7 +118,7 @@ public class EventHandler {
         } catch (APPBadRequestException e) {
             throw e;
         }catch (SQLException e) {
-            throw new APPBadRequestException(33,"Failed to add an event.");
+            throw new APPBadRequestException(33,"Failed to add an announcement.");
         } catch(Exception e) {
             throw new APPInternalServerException(99,"Something happened at server side!");
         }
@@ -142,31 +141,31 @@ public class EventHandler {
         try {
             if (json.has("clubId"))
                 throw new APPBadRequestException(33, "Club can't be updated.");
-            String sql = "UPDATE clubus.events SET ";
+            String sql = "UPDATE clubus.announcements SET ";
 
             connection = database.getConnection();
 
-            if(json.has("eventInfo"))
-                sql = sql + "eventInfo = '" +  json.getString("eventInfo") + "', ";
+            if(json.has("announcementInfo"))
+                sql = sql + "announcementInfo = '" +  json.getString("announcementInfo") + "', ";
             if(json.has("picture"))
                 sql = sql + "picture = '" +  json.getString("picture") + "', ";
-            if(json.has("eventName"))
-                sql = sql + "eventName = '" +  json.getString("eventName") + "', ";
-            if(json.has("eventDateTime"))
-                sql = sql + "eventDateTime = '" +  json.getString("eventDateTime") + "', ";
+            if(json.has("announcementName"))
+                sql = sql + "announcementName = '" +  json.getString("announcementName") + "', ";
+            if(json.has("announcementDateTime"))
+                sql = sql + "announcementDateTime = '" +  json.getString("announcementDateTime") + "', ";
 
-            sql = sql.substring(0,sql.length()-2) + " WHERE eventId = '" + id + "'";
+            sql = sql.substring(0,sql.length()-2) + " WHERE announcementId = '" + id + "'";
 
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.execute();
             connection.close();
 
         } catch(SQLException e) {
-            throw new APPBadRequestException(33,"Failed to update an event due to SQL.");
+            throw new APPBadRequestException(33,"Failed to update an announcement due to SQL.");
         } catch(APPBadRequestException e){
             throw e;
         } catch(JSONException e) {
-            throw new APPBadRequestException(33,"Failed to update an event due to JSON.");
+            throw new APPBadRequestException(33,"Failed to update an announcement due to JSON.");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -177,7 +176,7 @@ public class EventHandler {
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
     public APPResponse delete(@PathParam("id") String id) {
-        String sql = "DELETE FROM clubus.events WHERE eventId = ?";
+        String sql = "DELETE FROM clubus.announcements WHERE announcementId = ?";
         try {
             connection = database.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -187,7 +186,7 @@ public class EventHandler {
 
             return new APPResponse(new JSONObject());
         } catch(SQLException e) {
-            throw new APPBadRequestException(33,"Failed to delete an event");
+            throw new APPBadRequestException(33,"Failed to delete an announcement");
         } catch(Exception e) {
             throw new APPInternalServerException(99,"Something happened at server side!");
         }

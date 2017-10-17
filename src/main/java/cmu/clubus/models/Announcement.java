@@ -1,13 +1,13 @@
 package cmu.clubus.models;
 
-import java.sql.Time;
+import java.sql.Timestamp;
 
 /**
  * The accouncement of a club.
  */
 public class Announcement {
     String announcementId, clubId, announcementName, announcementInfo, picture;
-    Time announcementDateTime;
+    Timestamp announcementDateTime;
 
     /**
      *
@@ -17,7 +17,7 @@ public class Announcement {
      * @param announcementDateTime
      * @param picture
      */
-    public Announcement(String clubId, String announcementName, String announcementInfo, Time announcementDateTime, String picture){
+    public Announcement(String clubId, String announcementName, String announcementInfo, Timestamp announcementDateTime, String picture){
         this.clubId = clubId;
         this.announcementName = announcementName;
         this.announcementInfo = announcementInfo;
