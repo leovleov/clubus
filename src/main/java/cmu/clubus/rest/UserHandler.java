@@ -32,7 +32,7 @@ public class UserHandler {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public ArrayList<User> getAllUsers(){
+    public APPResponse getAllUsers(){
         ArrayList<User> userList = new ArrayList<User>();
         try {
             connection = database.getConnection();
@@ -46,7 +46,7 @@ public class UserHandler {
                 userList.add(user);
             }
             connection.close();
-            return userList;
+            return new APPResponse(userList);
         } catch(SQLException e) {
             throw new APPBadRequestException(33,"Failed to get all users.");
         } catch (Exception e) {
@@ -57,7 +57,7 @@ public class UserHandler {
     @GET
     @Path("fb/{id}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public User getOneFb(@PathParam("id") String id){
+    public APPResponse getOneFb(@PathParam("id") String id){
 
         try{
             connection = database.getConnection();
@@ -71,7 +71,10 @@ public class UserHandler {
                 user.setId(rs.getString("userId"));
             }
             connection.close();
-            return user;
+            if(user == null)
+                return new APPResponse(user,false);
+            else
+                return new APPResponse(user);
         } catch(SQLException e) {
             throw new APPBadRequestException(33,"Failed to get an user.");
         } catch (Exception e) {
@@ -82,7 +85,7 @@ public class UserHandler {
     @GET
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public User getOne(@PathParam("id") String id){
+    public APPResponse getOne(@PathParam("id") String id){
 
         try{
             connection = database.getConnection();
@@ -100,7 +103,7 @@ public class UserHandler {
             }
 
             connection.close();
-            return user;
+            return new APPResponse(user);
         } catch(SQLException e) {
             throw new APPBadRequestException(33,"Failed to get an user.");
         } catch(APPNotFoundException e) {
@@ -113,7 +116,7 @@ public class UserHandler {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public Object create(Object request) {
+    public APPResponse create(Object request) {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
@@ -156,7 +159,7 @@ public class UserHandler {
             ps.executeUpdate();
             connection.close();
 
-            return request;
+            return new APPResponse(request);
         } catch (APPBadRequestException e) {
             throw new APPBadRequestException(55,"missing key parameters.");
         }catch (SQLException e) {
@@ -170,7 +173,7 @@ public class UserHandler {
     @Path("{id}")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public Object update(@PathParam("id") String id, Object request) {
+    public APPResponse update(@PathParam("id") String id, Object request) {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
@@ -219,13 +222,13 @@ public class UserHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return request;
+        return new APPResponse(request);
     }
 
     @DELETE
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public Object delete(@PathParam("id") String id) {
+    public APPResponse delete(@PathParam("id") String id) {
         String sql = "DELETE FROM clubus.users WHERE userId = ?";
         try {
             connection = database.getConnection();
@@ -234,7 +237,7 @@ public class UserHandler {
             ps.execute();
             connection.close();
 
-            return new JSONObject();
+            return new APPResponse(new JSONObject());
         } catch(SQLException e) {
             throw new APPBadRequestException(33,"Failed to delete an user");
         } catch(Exception e) {

@@ -2,7 +2,7 @@ package cmu.clubus.rest;
 
 import cmu.clubus.exceptions.*;
 import cmu.clubus.helpers.DbConnection;
-import cmu.clubus.helpers.PATCH;
+import cmu.clubus.helpers.*;
 import cmu.clubus.models.Club;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +32,7 @@ public class ClubHandler {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public ArrayList<Club> getAllClubs(){
+    public APPResponse getAllClubs(){
         ArrayList<Club> clubList = new ArrayList<>();
         try {
             connection = database.getConnection();
@@ -45,7 +45,7 @@ public class ClubHandler {
                 clubList.add(club);
             }
             connection.close();
-            return clubList;
+            return new APPResponse(clubList);
         } catch(SQLException e) {
             throw new APPBadRequestException(33,"Failed to get all clubs.");
         } catch (Exception e) {
@@ -56,7 +56,7 @@ public class ClubHandler {
     @GET
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public Club getOne(@PathParam("id") String id){
+    public APPResponse getOne(@PathParam("id") String id){
 
         try{
             connection = database.getConnection();
@@ -73,7 +73,7 @@ public class ClubHandler {
             }
 
             connection.close();
-            return club;
+            return new APPResponse(club);
         } catch(SQLException e) {
             throw new APPBadRequestException(33,"Failed to get a club.");
         } catch(APPNotFoundException e) {
@@ -86,7 +86,7 @@ public class ClubHandler {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public Object create(Object request) {
+    public APPResponse create(Object request) {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
@@ -113,7 +113,7 @@ public class ClubHandler {
                 ps.setString(4, null);
             ps.executeUpdate();
             connection.close();
-            return request;
+            return new APPResponse(request);
         } catch (APPBadRequestException e) {
             throw new APPBadRequestException(55,"missing key parameters.");
         }catch (SQLException e) {
@@ -127,7 +127,7 @@ public class ClubHandler {
     @Path("{id}")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public Object update(@PathParam("id") String id, Object request) {
+    public APPResponse update(@PathParam("id") String id, Object request) {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
@@ -167,13 +167,13 @@ public class ClubHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return request;
+        return new APPResponse(request);
     }
 
     @DELETE
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public Object delete(@PathParam("id") String id) {
+    public APPResponse delete(@PathParam("id") String id) {
         String sql = "DELETE FROM clubus.clubs WHERE clubId = ?";
         try {
             connection = database.getConnection();
@@ -182,7 +182,7 @@ public class ClubHandler {
             ps.execute();
 
             connection.close();
-            return new JSONObject();
+            return new APPResponse(new JSONObject());
         } catch(SQLException e) {
             throw new APPBadRequestException(33,"Failed to delete an club");
         } catch(Exception e) {

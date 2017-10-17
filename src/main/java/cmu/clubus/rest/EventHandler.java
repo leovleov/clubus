@@ -3,8 +3,7 @@ package cmu.clubus.rest;
 import cmu.clubus.exceptions.APPBadRequestException;
 import cmu.clubus.exceptions.APPInternalServerException;
 import cmu.clubus.exceptions.APPNotFoundException;
-import cmu.clubus.helpers.DbConnection;
-import cmu.clubus.helpers.PATCH;
+import cmu.clubus.helpers.*;
 import cmu.clubus.models.Event;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +30,7 @@ public class EventHandler {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public ArrayList<Event> getAllClubs(){
+    public APPResponse getAllClubs(){
         ArrayList<Event> eventList = new ArrayList<>();
         try {
             connection = database.getConnection();
@@ -44,7 +43,7 @@ public class EventHandler {
                 eventList.add(event);
             }
             connection.close();
-            return eventList;
+            return new APPResponse(eventList);
         } catch(SQLException e) {
             throw new APPBadRequestException(33,"Failed to get all events.");
         } catch (Exception e) {
@@ -55,7 +54,7 @@ public class EventHandler {
     @GET
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public Event getOne(@PathParam("id") String id){
+    public APPResponse getOne(@PathParam("id") String id){
 
         try{
             connection = database.getConnection();
@@ -72,7 +71,7 @@ public class EventHandler {
             }
 
             connection.close();
-            return event;
+            return new APPResponse(event);
         } catch(SQLException e) {
             throw new APPBadRequestException(33,"Failed to get an event.");
         } catch(APPNotFoundException e) {
@@ -85,7 +84,7 @@ public class EventHandler {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public Object create(Object request) {
+    public APPResponse create(Object request) {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
@@ -116,7 +115,7 @@ public class EventHandler {
             ps.executeUpdate();
             connection.close();
 
-            return request;
+            return new APPResponse(request);
         } catch (APPBadRequestException e) {
             throw new APPBadRequestException(55,"missing key parameters.");
         }catch (SQLException e) {
@@ -130,7 +129,7 @@ public class EventHandler {
     @Path("{id}")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public Object update(@PathParam("id") String id, Object request) {
+    public APPResponse update(@PathParam("id") String id, Object request) {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
@@ -171,13 +170,13 @@ public class EventHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return request;
+        return new APPResponse(request);
     }
 
     @DELETE
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public Object delete(@PathParam("id") String id) {
+    public APPResponse delete(@PathParam("id") String id) {
         String sql = "DELETE FROM clubus.events WHERE eventId = ?";
         try {
             connection = database.getConnection();
@@ -186,7 +185,7 @@ public class EventHandler {
             ps.execute();
             connection.close();
 
-            return new JSONObject();
+            return new APPResponse(new JSONObject());
         } catch(SQLException e) {
             throw new APPBadRequestException(33,"Failed to delete an event");
         } catch(Exception e) {
