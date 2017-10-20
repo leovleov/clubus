@@ -4,6 +4,7 @@ import cmu.clubus.exceptions.*;
 import cmu.clubus.helpers.DbConnection;
 import cmu.clubus.helpers.*;
 import cmu.clubus.models.Club;
+import cmu.clubus.models.ClubUsers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -53,6 +54,31 @@ public class ClubHandler {
         }
     }
 
+
+    @GET
+    @Path("random3")
+    @Produces({MediaType.APPLICATION_JSON})
+    public APPResponse getRandom3Clubs(){
+        ArrayList<Club> clubList = new ArrayList<>();
+        try {
+            connection = database.getConnection();
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM clubus.clubs ORDER BY RAND() LIMIT 3");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Club club = new Club(rs.getString("clubName"), rs.getString("clubInfo"), rs.getString("clubLeaders"),
+                        rs.getString("picture"));
+                club.setId(rs.getString("clubId"));
+                clubList.add(club);
+            }
+            connection.close();
+            return new APPResponse(clubList);
+        } catch(SQLException e) {
+            throw new APPBadRequestException(33,"Failed to get 3 clubs.");
+        } catch (Exception e) {
+            throw new APPInternalServerException(99,"Something happened at server side!");
+        }
+    }
+
     @GET
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
@@ -69,7 +95,7 @@ public class ClubHandler {
                 club.setId(rs.getString("clubId"));
             }
             else{
-                throw new APPNotFoundException(404,"Failed to find an event.");
+                throw new APPNotFoundException(404,"Failed to find an club.");
             }
 
             connection.close();
@@ -78,6 +104,39 @@ public class ClubHandler {
             throw new APPBadRequestException(33,"Failed to get a club.");
         } catch(APPNotFoundException e) {
             throw new APPNotFoundException(404,"Failed to find a club.");
+        } catch (Exception e) {
+            throw new APPInternalServerException(99,"Something happened at server side!");
+        }
+    }
+
+    @GET
+    @Path("{id}/users")
+    @Produces({ MediaType.APPLICATION_JSON})
+    public APPResponse getUserClubs(@PathParam("id") String id){
+
+        try{
+            connection = database.getConnection();
+            PreparedStatement ps = connection.prepareStatement("select c.clubId, c.clubName, group_concat(DISTINCT u.userId SEPARATOR ', ') as userIds " +
+                    "from clubus.clubs c " +
+                    "inner join clubus.userclubs uc on c.clubId = uc.clubId " +
+                    "inner join clubus.users u on uc.userId = u.userId " +
+                    "where c.clubId = '" + id + "' " +
+                    "group by c.clubId, c.clubName");
+            ResultSet rs = ps.executeQuery();
+            ClubUsers clubUsers = null;
+            if(rs.next()) {
+                clubUsers = new ClubUsers(rs.getString("clubId"), rs.getString("clubName"), rs.getString("userIds"));
+            }
+            else{
+                throw new APPNotFoundException(404,"Failed to find the users.");
+            }
+
+            connection.close();
+            return new APPResponse(clubUsers);
+        } catch(SQLException e) {
+            throw new APPBadRequestException(404,"Failed to get the users.");
+        } catch(APPNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             throw new APPInternalServerException(99,"Something happened at server side!");
         }

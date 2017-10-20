@@ -1,6 +1,7 @@
 package cmu.clubus.rest;
 
 import cmu.clubus.helpers.*;
+import cmu.clubus.models.UserClubs;
 import cmu.clubus.models.User;
 import cmu.clubus.exceptions.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -113,6 +114,39 @@ public class UserHandler {
             throw new APPBadRequestException(33,"Failed to get an user.");
         } catch(APPNotFoundException e) {
             throw new APPNotFoundException(404,"Failed to find an user.");
+        } catch (Exception e) {
+            throw new APPInternalServerException(99,"Something happened at server side!");
+        }
+    }
+
+    @GET
+    @Path("{id}/clubs")
+    @Produces({ MediaType.APPLICATION_JSON})
+    public APPResponse getUserClubs(@PathParam("id") String id){
+
+        try{
+            connection = database.getConnection();
+            PreparedStatement ps = connection.prepareStatement("select u.userId, u.userName, group_concat(DISTINCT c.clubId SEPARATOR ', ') as clubIds " +
+                    "from clubus.users u " +
+                    "inner join clubus.userclubs uc on u.userId = uc.userId " +
+                    "inner join clubus.clubs c on uc.clubId = c.clubId " +
+                    "where u.userId = '" + id + "' " +
+                    "group by u.userId, u.userName");
+            ResultSet rs = ps.executeQuery();
+            UserClubs userClubs = null;
+            if(rs.next()) {
+                userClubs = new UserClubs(rs.getString("userId"), rs.getString("userName"), rs.getString("clubIds"));
+            }
+            else{
+                throw new APPNotFoundException(404,"Failed to find the clubs.");
+            }
+
+            connection.close();
+            return new APPResponse(userClubs);
+        } catch(SQLException e) {
+            throw new APPBadRequestException(404,"Failed to get the clubs.");
+        } catch(APPNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             throw new APPInternalServerException(99,"Something happened at server side!");
         }
