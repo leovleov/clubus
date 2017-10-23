@@ -7,6 +7,7 @@ import cmu.clubus.exceptions.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import io.swagger.annotations.Api;
 import org.json.JSONObject;
 import org.json.JSONException;
 
@@ -19,6 +20,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 @Path("users")
+@Api
 public class UserHandler {
 
     DbConnection database;

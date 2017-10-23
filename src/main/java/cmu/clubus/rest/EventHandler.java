@@ -8,6 +8,7 @@ import cmu.clubus.models.Event;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import io.swagger.annotations.Api;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,6 +18,7 @@ import java.sql.*;
 import java.util.ArrayList;
 
 @Path("events")
+@Api
 public class EventHandler {
     DbConnection database;
     Connection connection;

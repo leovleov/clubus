@@ -10,7 +10,8 @@ public class DbConnection {
     {
         try
         {
-            String connectionURL = "jdbc:mysql://localhost:3306/";
+            //String connectionURL = "jdbc:mysql://localhost:3306/";
+            String connectionURL = "jdbc:mysql://35.192.78.43:3306/";
             Connection connection = null;
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             connection = DriverManager.getConnection(connectionURL, "root", "3hero3hero");
