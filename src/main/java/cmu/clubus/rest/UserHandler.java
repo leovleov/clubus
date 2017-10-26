@@ -1,6 +1,7 @@
 package cmu.clubus.rest;
 
 import cmu.clubus.helpers.*;
+import cmu.clubus.models.Event;
 import cmu.clubus.models.UserClubs;
 import cmu.clubus.models.User;
 import cmu.clubus.exceptions.*;
@@ -128,12 +129,13 @@ public class UserHandler {
 
         try{
             connection = database.getConnection();
-            PreparedStatement ps = connection.prepareStatement("select u.userId, u.userName, group_concat(DISTINCT c.clubId SEPARATOR ', ') as clubIds " +
+            /*PreparedStatement ps = connection.prepareStatement("select u.userId, u.userName, group_concat(DISTINCT c.clubId SEPARATOR ', ') as clubIds " +
                     "from clubus.users u " +
                     "inner join clubus.userclubs uc on u.userId = uc.userId " +
                     "inner join clubus.clubs c on uc.clubId = c.clubId " +
                     "where u.userId = '" + id + "' " +
-                    "group by u.userId, u.userName");
+                    "group by u.userId, u.userName");*/
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM clubus.clubsinusers WHERE userId = '" + id + "'");
             ResultSet rs = ps.executeQuery();
             UserClubs userClubs = null;
             if(rs.next()) {
@@ -145,6 +147,41 @@ public class UserHandler {
 
             connection.close();
             return new APPResponse(userClubs);
+        } catch(SQLException e) {
+            throw new APPBadRequestException(404,"Failed to get the clubs.");
+        } catch(APPNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new APPInternalServerException(99,"Something happened at server side!");
+        }
+    }
+
+    @GET
+    @Path("{id}/events")
+    @Produces({ MediaType.APPLICATION_JSON})
+    public APPResponse getUserEvents(@PathParam("id") String id){
+        try{
+            connection = database.getConnection();
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM clubus.clubsinusers WHERE userId = '" + id + "'");
+            ResultSet rs = ps.executeQuery();
+            ArrayList<Event> eventList = new ArrayList<>();
+            String clublist = null;
+            if(rs.next()) {
+                clublist = rs.getString("clubIds");
+            }
+            else{
+                throw new APPNotFoundException(404,"Failed to find the clubs.");
+            }
+            ps = connection.prepareStatement("SELECT * FROM clubus.events where clubId in ("+ clublist + ")");
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Event event = new Event(rs.getString("clubId"), rs.getString("eventName"), rs.getString("eventInfo"),
+                        rs.getTimestamp("eventDateTime"), rs.getString("picture"));
+                event.setId(rs.getString("eventId"));
+                eventList.add(event);
+            }
+            connection.close();
+            return new APPResponse(eventList);
         } catch(SQLException e) {
             throw new APPBadRequestException(404,"Failed to get the clubs.");
         } catch(APPNotFoundException e) {

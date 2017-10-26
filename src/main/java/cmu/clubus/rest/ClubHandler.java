@@ -114,16 +114,17 @@ public class ClubHandler {
     @GET
     @Path("{id}/users")
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse getUserClubs(@PathParam("id") String id){
+    public APPResponse getClubUsers(@PathParam("id") String id){
 
         try{
             connection = database.getConnection();
-            PreparedStatement ps = connection.prepareStatement("select c.clubId, c.clubName, group_concat(DISTINCT u.userId SEPARATOR ', ') as userIds " +
+            /*PreparedStatement ps = connection.prepareStatement("select c.clubId, c.clubName, group_concat(DISTINCT u.userId SEPARATOR ', ') as userIds " +
                     "from clubus.clubs c " +
                     "inner join clubus.userclubs uc on c.clubId = uc.clubId " +
                     "inner join clubus.users u on uc.userId = u.userId " +
                     "where c.clubId = '" + id + "' " +
-                    "group by c.clubId, c.clubName");
+                    "group by c.clubId, c.clubName");*/
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM clubus.clubsmembers where clubId = '" + id + "'");
             ResultSet rs = ps.executeQuery();
             ClubUsers clubUsers = null;
             if(rs.next()) {
