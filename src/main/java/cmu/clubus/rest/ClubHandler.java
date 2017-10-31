@@ -43,7 +43,7 @@ public class ClubHandler {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Club club = new Club(rs.getString("clubName"), rs.getString("clubInfo"), rs.getString("clubLeaders"),
-                        rs.getString("picture"));
+                        rs.getString("picture"), rs.getString("pictureFullRes"));
                 club.setId(rs.getString("clubId"));
                 clubList.add(club);
             }
@@ -68,7 +68,7 @@ public class ClubHandler {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Club club = new Club(rs.getString("clubName"), rs.getString("clubInfo"), rs.getString("clubLeaders"),
-                        rs.getString("picture"));
+                        rs.getString("picture"), rs.getString("pictureFullRes"));
                 club.setId(rs.getString("clubId"));
                 clubList.add(club);
             }
@@ -93,7 +93,7 @@ public class ClubHandler {
             Club club = null;
             if(rs.next()) {
                 club = new Club(rs.getString("clubName"), rs.getString("clubInfo"), rs.getString("clubLeaders"),
-                        rs.getString("picture"));
+                        rs.getString("picture"), rs.getString("pictureFullRes"));
                 club.setId(rs.getString("clubId"));
             }
             else{
@@ -163,7 +163,7 @@ public class ClubHandler {
         if (!json.has("clubLeaders"))
             throw new APPBadRequestException(55,"missing club leader");
         try {
-            String sql = "INSERT INTO clubus.clubs(clubName, clubInfo, clubLeaders, picture) VALUES(?,?,?,?)";
+            String sql = "INSERT INTO clubus.clubs(clubName, clubInfo, clubLeaders, picture, pictureFullRes) VALUES(?,?,?,?,?)";
             connection = database.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, json.getString("clubName"));
@@ -173,6 +173,10 @@ public class ClubHandler {
                 ps.setString(4, json.getString("picture"));
             else
                 ps.setString(4, null);
+            if (json.has("pictureFullRes"))
+                ps.setString(5, json.getString("pictureFullRes"));
+            else
+                ps.setString(5, null);
             ps.executeUpdate();
             connection.close();
             return new APPResponse(request);
@@ -213,7 +217,8 @@ public class ClubHandler {
                 sql = sql + "clubLeaders = '" +  json.getString("clubLeaders") + "', ";
             if(json.has("picture"))
                 sql = sql + "picture = '" +  json.getString("picture") + "', ";
-
+            if(json.has("pictureFullRes"))
+                sql = sql + "picture = '" +  json.getString("pictureFullRes") + "', ";
             sql = sql.substring(0,sql.length()-2) + " WHERE clubId = '" + id + "'";
 
             PreparedStatement ps = connection.prepareStatement(sql);
