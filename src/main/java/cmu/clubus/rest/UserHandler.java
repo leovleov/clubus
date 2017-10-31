@@ -235,9 +235,25 @@ public class UserHandler {
             else
                 ps.setInt(8, 1);
             ps.executeUpdate();
+
+            //get user info back to have the userId
+            ps = connection.prepareStatement("SELECT * FROM clubus.users WHERE facebookId = '"+ json.getString("facebookId") +"'");
+            ResultSet rs = ps.executeQuery();
+            User user = null;
+            if(rs.next()) {
+                user = new User(rs.getString("userName"), rs.getString("picture"), rs.getString("emailFromFB"),
+                        rs.getString("andrewEmail"), rs.getString("emailSubscribed"), rs.getString("phoneNumber"),
+                        rs.getBoolean("isSubscribed"), rs.getString("facebookId"));
+                user.setId(rs.getString("userId"));
+            }
+            else{
+                throw new APPNotFoundException(404,"Failed to find an user.");
+            }
+
+
             connection.close();
 
-            return new APPResponse(request);
+            return new APPResponse(user);
         } catch (APPBadRequestException e) {
             throw new APPBadRequestException(55,"missing key parameters.");
         }catch (SQLException e) {
