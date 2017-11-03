@@ -6,7 +6,7 @@ import java.sql.Timestamp;
  * Basic Event class.
  */
 public class Event {
-    String eventId, clubId, eventName, eventInfo, picture;
+    String eventId, clubId, eventName, eventInfo, picture, eventLocation;
     Timestamp eventDateTime;
 
     /**
@@ -17,12 +17,13 @@ public class Event {
      * @param eventDateTime The date that this event holds.
      * @param picture The picture link of this event.
      */
-    public Event(String clubId, String eventName, String eventInfo, Timestamp eventDateTime, String picture){
+    public Event(String clubId, String eventName, String eventInfo, Timestamp eventDateTime, String picture, String eventLoaction){
         this.clubId = clubId;
         this.eventName = eventName;
         this.eventInfo = eventInfo;
         this.eventDateTime = eventDateTime;
         this.picture = picture;
+        this.eventLocation = eventLoaction;
     }
 
     /**

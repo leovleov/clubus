@@ -40,7 +40,7 @@ public class EventHandler {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Event event = new Event(rs.getString("clubId"), rs.getString("eventName"), rs.getString("eventInfo"),
-                        rs.getTimestamp("eventDateTime"), rs.getString("picture"));
+                        rs.getTimestamp("eventDateTime"), rs.getString("picture"), rs.getString("eventLocation"));
                 event.setId(rs.getString("eventId"));
                 eventList.add(event);
             }
@@ -65,7 +65,7 @@ public class EventHandler {
             Event event = null;
             if(rs.next()) {
                 event = new Event(rs.getString("clubId"), rs.getString("eventName"), rs.getString("eventInfo"),
-                        rs.getTimestamp("eventDateTime"), rs.getString("picture"));
+                        rs.getTimestamp("eventDateTime"), rs.getString("picture"), rs.getString("eventLocation"));
                 event.setId(rs.getString("eventId"));
             }
             else{
@@ -102,8 +102,10 @@ public class EventHandler {
             throw new APPBadRequestException(55,"missing description");
         if (!json.has("eventDateTime"))
             throw new APPBadRequestException(55,"missing event time");
+        if (!json.has("eventLocation"))
+            throw new APPBadRequestException(55,"missing event location");
         try {
-            String sql = "INSERT INTO clubus.events(clubId, eventName, eventInfo, eventDateTime, picture) VALUES(?,?,?,?,?)";
+            String sql = "INSERT INTO clubus.events(clubId, eventName, eventInfo, eventDateTime, picture, eventLocation) VALUES(?,?,?,?,?,?)";
             connection = database.getConnection();
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, json.getString("clubId"));
@@ -114,6 +116,7 @@ public class EventHandler {
                 ps.setString(5, json.getString("picture"));
             else
                 ps.setString(5, null);
+            ps.setString(6, json.getString("eventLocation"));
             ps.executeUpdate();
             connection.close();
 
@@ -156,6 +159,8 @@ public class EventHandler {
                 sql = sql + "eventName = '" +  json.getString("eventName") + "', ";
             if(json.has("eventDateTime"))
                 sql = sql + "eventDateTime = '" +  json.getString("eventDateTime") + "', ";
+            if(json.has("eventLocation"))
+                sql = sql + "eventLocation = '" +  json.getString("eventLocation") + "', ";
 
             sql = sql.substring(0,sql.length()-2) + " WHERE eventId = '" + id + "'";
 

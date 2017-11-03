@@ -176,7 +176,7 @@ public class UserHandler {
             rs = ps.executeQuery();
             while (rs.next()) {
                 Event event = new Event(rs.getString("clubId"), rs.getString("eventName"), rs.getString("eventInfo"),
-                        rs.getTimestamp("eventDateTime"), rs.getString("picture"));
+                        rs.getTimestamp("eventDateTime"), rs.getString("picture"), rs.getString("eventLocation"));
                 event.setId(rs.getString("eventId"));
                 eventList.add(event);
             }
