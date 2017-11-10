@@ -32,7 +32,7 @@ public class EventHandler {
 
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public APPResponse getAllClubs(){
+    public APPResponse getAllEvents(){
         ArrayList<Event> eventList = new ArrayList<>();
         try {
             connection = database.getConnection();

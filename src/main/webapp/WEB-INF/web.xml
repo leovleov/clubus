@@ -47,6 +47,11 @@
         </init-param>
         <load-on-startup>2</load-on-startup>
     </servlet>
+    <servlet>
+        <servlet-name>SendEmailServlet</servlet-name>
+        <servlet-class>cmu.clubus.rest.SendEmail</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
 </web-app>
 
         <!-- COMMENT -->
