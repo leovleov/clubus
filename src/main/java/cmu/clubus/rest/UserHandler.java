@@ -324,8 +324,12 @@ public class UserHandler {
     @Produces({ MediaType.APPLICATION_JSON})
     public APPResponse delete(@PathParam("id") String id) {
         String sql = "DELETE FROM clubus.users WHERE userId = ?";
+        String sql2 = "DELETE FROM clubus.userclubs WHERE userId = ?";
         try {
             connection = database.getConnection();
+            PreparedStatement ps2 = connection.prepareStatement(sql2);
+            ps2.setString(1, id);
+            ps2.execute();
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, id);
             ps.execute();

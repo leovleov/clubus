@@ -12,6 +12,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.servlet.http.HttpServlet;
@@ -34,14 +37,16 @@ public class SendEmail extends HttpServlet {
 //    public APPResponse doSendEmail() {
     public void init() throws ServletException{
 
-        Timer timer = new Timer ();
-        TimerTask hourlyTask = new TimerTask () {
+//        Timer timer = new Timer ();
+//        TimerTask hourlyTask = new TimerTask () {
+        ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+        service.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run () {
-
+                System.out.println("Run send email.");
                 try{
                     final String username = "postmaster@mg.clubus.me";
-                    final String password = "ac63db35e25b11aa2c5f18055d43a0ef";
+                    final String password = "jrir837jhdi3ur9F=d2Dje";
 
 
 
@@ -149,9 +154,9 @@ public class SendEmail extends HttpServlet {
 
 
             }
-        };
+        }, 0, 1, TimeUnit.HOURS);
 
-        timer.schedule (hourlyTask, 0l, 1000*60*60);
+        //timer.schedule (hourlyTask, 0l, 1000*60*60);
         //return new APPResponse("Success!!");
 
 
