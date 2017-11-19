@@ -76,7 +76,7 @@ public class SendEmail extends HttpServlet {
                             });
 
                     connection = database.getConnection();
-                    PreparedStatement ps = connection.prepareStatement("SELECT * FROM clubus.events WHERE eventDateTime <  NOW() + INTERVAL 1 DAY AND eventDateTime > NOW() AND isNotified = 0");
+                    PreparedStatement ps = connection.prepareStatement("SELECT * FROM clubus.events WHERE eventDateTime <  CONVERT_TZ(NOW(),'+8:00','-0:00') + INTERVAL 1 DAY AND eventDateTime > CONVERT_TZ(NOW(),'+8:00','-0:00') AND isNotified = 0");
                     ResultSet rs = ps.executeQuery();
                     while (rs.next()) {
 //                        Event event = new Event(rs.getString("clubId"), rs.getString("eventName"), rs.getString("eventInfo"),
