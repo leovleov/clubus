@@ -44,6 +44,7 @@
         <init-param>
             <param-name>swagger.api.basepath</param-name>
             <param-value>http://35.202.60.78:8080/clubus</param-value>
+            <!--<param-value>http://localhost:8080/clubus</param-value>-->
         </init-param>
         <load-on-startup>2</load-on-startup>
     </servlet>

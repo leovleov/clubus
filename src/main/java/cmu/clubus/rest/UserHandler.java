@@ -325,11 +325,17 @@ public class UserHandler {
     public APPResponse delete(@PathParam("id") String id) {
         String sql = "DELETE FROM clubus.users WHERE userId = ?";
         String sql2 = "DELETE FROM clubus.userclubs WHERE userId = ?";
+        String sql3 = "SELECT * FROM clubus.userclubs WHERE userId = ?";
         try {
             connection = database.getConnection();
-            PreparedStatement ps2 = connection.prepareStatement(sql2);
-            ps2.setString(1, id);
-            ps2.execute();
+            PreparedStatement ps3 = connection.prepareStatement(sql3);
+            ps3.setString(1,id);
+            ResultSet rs = ps3.executeQuery();
+            if(rs.next()) {
+                PreparedStatement ps2 = connection.prepareStatement(sql2);
+                ps2.setString(1, id);
+                ps2.execute();
+            }
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, id);
             ps.execute();
